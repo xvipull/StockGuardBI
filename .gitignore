@@ -1,0 +1,17 @@
+# Operating-system files
+.DS_Store
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies and builds
+node_modules/
+dist/
+build/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+.venv/
