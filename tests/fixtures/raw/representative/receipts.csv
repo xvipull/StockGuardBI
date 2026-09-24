@@ -1,0 +1,2 @@
+receipt_id,receipt_line_id,receipt_date,sku_id,store_id,received_qty,received_unit_cost,lot_id
+RCPT-1,1,2025-01-01,SKU-100,STORE-001,20,12.50,LOT-001

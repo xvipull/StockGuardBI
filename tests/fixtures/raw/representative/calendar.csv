@@ -1,0 +1,2 @@
+calendar_date,day_of_week,week_start_date,month_start_date,fiscal_period,is_working_day
+2025-01-01,3,2024-12-30,2025-01-01,2025-P01,true

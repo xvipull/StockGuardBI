@@ -1,0 +1,2 @@
+sku_id,sku_name,category,subcategory,brand,base_uom,product_status,standard_unit_cost
+SKU-100,Widget A,Widgets,Standard,StockGuard,EA,ACTIVE,12.50

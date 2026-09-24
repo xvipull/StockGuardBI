@@ -1,0 +1,2 @@
+sku_id,store_id,effective_from_date,effective_to_date,lead_time_days,safety_stock_days,reorder_point_qty
+SKU-100,STORE-001,2025-01-01,,4,7,50

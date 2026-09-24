@@ -1,0 +1,2 @@
+transfer_id,transfer_line_id,transfer_date,sku_id,origin_store_id,destination_store_id,transfer_qty,transfer_status,expected_receipt_date
+TRF-1,1,2025-01-01,SKU-200,STORE-002,STORE-001,15,IN_TRANSIT,2025-01-03
