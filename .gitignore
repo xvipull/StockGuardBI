@@ -15,3 +15,8 @@ build/
 __pycache__/
 *.py[cod]
 .venv/
+
+# Generated or downloaded raw extracts (keep acquisition contract and documentation)
+data/raw/*.csv
+data/raw/*.parquet
+data/raw/manifest.json

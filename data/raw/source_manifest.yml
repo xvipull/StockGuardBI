@@ -1,0 +1,30 @@
+schema_version: 1.0.0
+acquisition_mode: synthetic
+generator:
+  status: planned
+  command: "python scripts/generate_synthetic_inventory_data.py --seed 20260924 --start-date 2025-01-01 --end-date 2025-03-31 --output-dir data/raw"
+  seed: 20260924
+  business_date_start: 2025-01-01
+  business_date_end: 2025-03-31
+  reproducibility_rule: "Same generator version, arguments, and seed must yield equivalent logical records."
+entities:
+  - inventory_snapshots
+  - sales
+  - receipts
+  - transfers
+  - reorder_parameters
+  - products
+  - stores
+  - calendar
+public_data:
+  permitted: true
+  required_metadata:
+    - source_url
+    - license
+    - retrieved_at
+    - checksum_sha256
+    - transformation_notes
+data_restrictions:
+  - No production ERP extracts
+  - No personally identifiable information
+  - No credentials or secrets
