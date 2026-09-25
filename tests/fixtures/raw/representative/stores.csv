@@ -1,2 +1,3 @@
 store_id,store_name,store_type,region,format,store_status
 STORE-001,Central Store,STORE,North,Standard,ACTIVE
+STORE-002,North Store,STORE,North,Standard,ACTIVE

@@ -23,7 +23,7 @@ class InventoryStagingTest(unittest.TestCase):
     def test_writes_standardized_staging_tables_with_lineage(self):
         manifest_path = stage(FIXTURE_DIR, self.output_dir, "test-stage-001")
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-        self.assertEqual(10, manifest["total_staged_rows"])
+        self.assertEqual(12, manifest["total_staged_rows"])
         self.assertEqual(0, manifest["total_quarantined_rows"])
 
         with (manifest_path.parent / "staging" / "stg_products.csv").open(newline="", encoding="utf-8") as source:
