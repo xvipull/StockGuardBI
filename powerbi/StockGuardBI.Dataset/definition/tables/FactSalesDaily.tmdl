@@ -1,0 +1,75 @@
+table FactSalesDaily
+	lineageTag: c370591e-450a-4700-9831-factsales0001
+
+	column sales_daily_key
+		dataType: string
+		isKey
+		lineageTag: c370591e-450a-4700-9831-factsalescol1
+		summarizeBy: none
+		sourceColumn: sales_daily_key
+
+	column date_key
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-factsalescol2
+		summarizeBy: none
+		sourceColumn: date_key
+
+	column sku_key
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-factsalescol3
+		summarizeBy: none
+		sourceColumn: sku_key
+
+	column store_key
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-factsalescol4
+		summarizeBy: none
+		sourceColumn: store_key
+
+	column requested_qty
+		dataType: double
+		lineageTag: c370591e-450a-4700-9831-factsalescol5
+		summarizeBy: sum
+		sourceColumn: requested_qty
+
+	column fulfilled_qty
+		dataType: double
+		lineageTag: c370591e-450a-4700-9831-factsalescol6
+		summarizeBy: sum
+		sourceColumn: fulfilled_qty
+
+	column units_sold_qty
+		dataType: double
+		lineageTag: c370591e-450a-4700-9831-factsalescol7
+		summarizeBy: sum
+		sourceColumn: units_sold_qty
+
+	column return_qty
+		dataType: double
+		lineageTag: c370591e-450a-4700-9831-factsalescol8
+		summarizeBy: sum
+		sourceColumn: return_qty
+
+	column net_sales_amount
+		dataType: double
+		formatString: \$#,##0.00
+		lineageTag: c370591e-450a-4700-9831-factsalescol9
+		summarizeBy: sum
+		sourceColumn: net_sales_amount
+
+	column cogs_amount
+		dataType: double
+		formatString: \$#,##0.00
+		lineageTag: c370591e-450a-4700-9831-factsalescol10
+		summarizeBy: sum
+		sourceColumn: cogs_amount
+
+	partition FactSalesDaily = m
+		mode: import
+		source = ```
+			let
+			    Source = Csv.Document(File.Contents("data/curated/fact_sales_daily.csv"),[Delimiter=",", Columns=10, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+			    PromotedHeaders = Table.PromoteHeaders(Source, [PromoteAllScalars=true])
+			in
+			    PromotedHeaders
+			```

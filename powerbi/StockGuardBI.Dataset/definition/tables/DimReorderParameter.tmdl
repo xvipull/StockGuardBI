@@ -1,0 +1,55 @@
+table DimReorderParameter
+	lineageTag: c370591e-450a-4700-9831-reorder000001
+
+	column reorder_parameter_key
+		dataType: string
+		isKey
+		lineageTag: c370591e-450a-4700-9831-reordercol001
+		summarizeBy: none
+		sourceColumn: reorder_parameter_key
+
+	column sku_key
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-reordercol002
+		summarizeBy: none
+		sourceColumn: sku_key
+
+	column store_key
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-reordercol003
+		summarizeBy: none
+		sourceColumn: store_key
+
+	column lead_time_days
+		dataType: int64
+		lineageTag: c370591e-450a-4700-9831-reordercol004
+		summarizeBy: none
+		sourceColumn: lead_time_days
+
+	column safety_stock_days
+		dataType: int64
+		lineageTag: c370591e-450a-4700-9831-reordercol005
+		summarizeBy: none
+		sourceColumn: safety_stock_days
+
+	column reorder_point_qty
+		dataType: double
+		lineageTag: c370591e-450a-4700-9831-reordercol006
+		summarizeBy: none
+		sourceColumn: reorder_point_qty
+
+	column target_stock_qty
+		dataType: double
+		lineageTag: c370591e-450a-4700-9831-reordercol007
+		summarizeBy: none
+		sourceColumn: target_stock_qty
+
+	partition DimReorderParameter = m
+		mode: import
+		source = ```
+			let
+			    Source = Csv.Document(File.Contents("data/curated/dim_reorder_parameter.csv"),[Delimiter=",", Columns=7, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+			    PromotedHeaders = Table.PromoteHeaders(Source, [PromoteAllScalars=true])
+			in
+			    PromotedHeaders
+			```

@@ -1,0 +1,52 @@
+relationship Rel_Date_Inventory
+	fromColumn: FactInventoryDaily.date_key
+	toColumn: DateTable.DateKey
+
+relationship Rel_Date_Sales
+	fromColumn: FactSalesDaily.date_key
+	toColumn: DateTable.DateKey
+
+relationship Rel_Date_Receipts
+	fromColumn: FactReceipts.date_key
+	toColumn: DateTable.DateKey
+
+relationship Rel_Date_Transfers
+	fromColumn: FactTransfers.date_key
+	toColumn: DateTable.DateKey
+
+relationship Rel_SKU_Inventory
+	fromColumn: FactInventoryDaily.sku_key
+	toColumn: DimSKU.sku_key
+
+relationship Rel_SKU_Sales
+	fromColumn: FactSalesDaily.sku_key
+	toColumn: DimSKU.sku_key
+
+relationship Rel_SKU_Receipts
+	fromColumn: FactReceipts.sku_key
+	toColumn: DimSKU.sku_key
+
+relationship Rel_Store_Inventory
+	fromColumn: FactInventoryDaily.store_key
+	toColumn: DimStore.store_key
+
+relationship Rel_Store_Sales
+	fromColumn: FactSalesDaily.store_key
+	toColumn: DimStore.store_key
+
+relationship Rel_Store_Receipts
+	fromColumn: FactReceipts.store_key
+	toColumn: DimStore.store_key
+
+relationship Rel_Store_Origin_Transfers
+	fromColumn: FactTransfers.origin_store_key
+	toColumn: DimStore.store_key
+
+relationship Rel_Store_Destination_Transfers
+	isActive: false
+	fromColumn: FactTransfers.destination_store_key
+	toColumn: DimStore.store_key
+
+relationship Rel_Reorder_Inventory
+	fromColumn: FactInventoryDaily.reorder_parameter_key
+	toColumn: DimReorderParameter.reorder_parameter_key

@@ -1,0 +1,152 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/powerbi/project/report/definition/report/1.0.0/schema.json",
+  "name": "StockGuardBI Executive Overview",
+  "themeCollection": {
+    "baseTheme": {
+      "name": "CY24SU06",
+      "version": "5.54",
+      "type": 2
+    }
+  },
+  "activeSectionName": "ExecutiveOverview",
+  "sections": [
+    {
+      "name": "ExecutiveOverview",
+      "displayName": "Executive Overview",
+      "filters": "[]",
+      "height": 1080,
+      "width": 1920,
+      "visualContainers": [
+        {
+          "name": "HeaderTitle",
+          "x": 30,
+          "y": 20,
+          "z": 0,
+          "width": 1860,
+          "height": 60,
+          "visual": {
+            "visualType": "textbox",
+            "title": "StockGuard BI — Executive Inventory Overview",
+            "text": "Real-time visibility into working capital, stockout risk, fill rates, and replenishment priorities."
+          }
+        },
+        {
+          "name": "Card_InventoryValue",
+          "x": 30,
+          "y": 100,
+          "z": 1,
+          "width": 350,
+          "height": 140,
+          "visual": {
+            "visualType": "card",
+            "title": "Total Inventory Value",
+            "measure": "[Ending Inventory Value]",
+            "format": "$#,##0.00"
+          }
+        },
+        {
+          "name": "Card_DOS",
+          "x": 410,
+          "y": 100,
+          "z": 2,
+          "width": 350,
+          "height": 140,
+          "visual": {
+            "visualType": "kpi",
+            "title": "Days of Supply (DOS)",
+            "measure": "[Days of Supply (DOS)]",
+            "target": "[DOS Target]",
+            "status": "[DOS Status]"
+          }
+        },
+        {
+          "name": "Card_FillRate",
+          "x": 790,
+          "y": 100,
+          "z": 3,
+          "width": 350,
+          "height": 140,
+          "visual": {
+            "visualType": "card",
+            "title": "Fill Rate %",
+            "measure": "[Fill Rate %]",
+            "format": "0.0%",
+            "target": "98.0%"
+          }
+        },
+        {
+          "name": "Card_StockoutRate",
+          "x": 1170,
+          "y": 100,
+          "z": 4,
+          "width": 350,
+          "height": 140,
+          "visual": {
+            "visualType": "card",
+            "title": "Stockout Rate %",
+            "measure": "[Stockout Rate %]",
+            "format": "0.0%",
+            "target": "< 2.0%"
+          }
+        },
+        {
+          "name": "Card_Exceptions",
+          "x": 1550,
+          "y": 100,
+          "z": 5,
+          "width": 340,
+          "height": 140,
+          "visual": {
+            "visualType": "card",
+            "title": "Replenishment Exceptions",
+            "measure": "[Replenishment Exception Count]",
+            "format": "#,##0"
+          }
+        },
+        {
+          "name": "Chart_InventoryTrends",
+          "x": 30,
+          "y": 260,
+          "z": 6,
+          "width": 1110,
+          "height": 400,
+          "visual": {
+            "visualType": "lineChart",
+            "title": "Daily Inventory Value & Sales COGS Trend",
+            "xAxis": "DateTable[Date]",
+            "yAxis": ["[Ending Inventory Value]", "[Total COGS]"]
+          }
+        },
+        {
+          "name": "Chart_CategoryAgedBreakdown",
+          "x": 1170,
+          "y": 260,
+          "z": 7,
+          "width": 720,
+          "height": 400,
+          "visual": {
+            "visualType": "barChart",
+            "title": "Aged Inventory Value (>90 Days) by Category",
+            "categoryAxis": "DimSKU[category]",
+            "valueAxis": "[Aged Stock Value (>90d)]"
+          }
+        },
+        {
+          "name": "Table_StorePerformanceHeatmap",
+          "x": 30,
+          "y": 680,
+          "z": 8,
+          "width": 1860,
+          "height": 370,
+          "visual": {
+            "visualType": "matrix",
+            "title": "Store-Level Operational Performance Matrix",
+            "rows": ["DimStore[region]", "DimStore[store_name]"],
+            "columns": ["Measures"],
+            "values": ["[Ending Inventory Value]", "[Days of Supply (DOS)]", "[Fill Rate %]", "[Stockout Rate %]", "[Replenishment Exception Count]"]
+          }
+        }
+      ]
+    }
+  ]
+}

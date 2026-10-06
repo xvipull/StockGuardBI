@@ -1,0 +1,89 @@
+table DateTable
+	lineageTag: c370591e-450a-4700-9831-date00000001
+	dataCategory: Time
+
+	column Date
+		dataType: dateTime
+		isKey
+		formatString: yyyy-MM-dd
+		lineageTag: c370591e-450a-4700-9831-datecol00001
+		summarizeBy: none
+		sourceColumn: Date
+
+	column DateKey
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-datecol00002
+		summarizeBy: none
+		sourceColumn: DateKey
+
+	column Year
+		dataType: int64
+		lineageTag: c370591e-450a-4700-9831-datecol00003
+		summarizeBy: none
+		sourceColumn: Year
+
+	column Quarter
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-datecol00004
+		summarizeBy: none
+		sourceColumn: Quarter
+
+	column Month
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-datecol00005
+		summarizeBy: none
+		sourceColumn: Month
+		sortByColumn: MonthNo
+
+	column MonthNo
+		dataType: int64
+		lineageTag: c370591e-450a-4700-9831-datecol00006
+		summarizeBy: none
+		sourceColumn: MonthNo
+
+	column YearMonth
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-datecol00007
+		summarizeBy: none
+		sourceColumn: YearMonth
+
+	column DayOfWeek
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-datecol00008
+		summarizeBy: none
+		sourceColumn: DayOfWeek
+		sortByColumn: DayOfWeekNo
+
+	column DayOfWeekNo
+		dataType: int64
+		lineageTag: c370591e-450a-4700-9831-datecol00009
+		summarizeBy: none
+		sourceColumn: DayOfWeekNo
+
+	column IsWorkingDay
+		dataType: int64
+		lineageTag: c370591e-450a-4700-9831-datecol00010
+		summarizeBy: none
+		sourceColumn: IsWorkingDay
+
+	partition DateTable = calculated
+		mode: import
+		source = ```
+			VAR MinDate = MIN(FactInventoryDaily[business_date])
+			VAR MaxDate = MAX(FactInventoryDaily[business_date])
+			VAR StartDate = IF(ISBLANK(MinDate), DATE(2025, 1, 1), MinDate)
+			VAR EndDate = IF(ISBLANK(MaxDate), DATE(2025, 12, 31), MaxDate)
+			RETURN
+			ADDCOLUMNS(
+			    CALENDAR(StartDate, EndDate),
+			    "DateKey", FORMAT([Date], "YYYYMMDD"),
+			    "Year", YEAR([Date]),
+			    "Quarter", "Q" & QUARTER([Date]),
+			    "Month", FORMAT([Date], "MMM"),
+			    "MonthNo", MONTH([Date]),
+			    "YearMonth", FORMAT([Date], "YYYY-MM"),
+			    "DayOfWeek", FORMAT([Date], "DDD"),
+			    "DayOfWeekNo", WEEKDAY([Date], 2),
+			    "IsWorkingDay", IF(WEEKDAY([Date], 2) <= 5, 1, 0)
+			)
+			```

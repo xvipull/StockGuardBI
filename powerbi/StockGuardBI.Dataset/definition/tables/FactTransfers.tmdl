@@ -1,0 +1,55 @@
+table FactTransfers
+	lineageTag: c370591e-450a-4700-9831-facttransfers1
+
+	column transfer_fact_key
+		dataType: string
+		isKey
+		lineageTag: c370591e-450a-4700-9831-facttrfcol1
+		summarizeBy: none
+		sourceColumn: transfer_fact_key
+
+	column date_key
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-facttrfcol2
+		summarizeBy: none
+		sourceColumn: date_key
+
+	column sku_key
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-facttrfcol3
+		summarizeBy: none
+		sourceColumn: sku_key
+
+	column origin_store_key
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-facttrfcol4
+		summarizeBy: none
+		sourceColumn: origin_store_key
+
+	column destination_store_key
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-facttrfcol5
+		summarizeBy: none
+		sourceColumn: destination_store_key
+
+	column transfer_qty
+		dataType: double
+		lineageTag: c370591e-450a-4700-9831-facttrfcol6
+		summarizeBy: sum
+		sourceColumn: transfer_qty
+
+	column transfer_status
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-facttrfcol7
+		summarizeBy: none
+		sourceColumn: transfer_status
+
+	partition FactTransfers = m
+		mode: import
+		source = ```
+			let
+			    Source = Csv.Document(File.Contents("data/curated/fact_transfers.csv"),[Delimiter=",", Columns=7, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+			    PromotedHeaders = Table.PromoteHeaders(Source, [PromoteAllScalars=true])
+			in
+			    PromotedHeaders
+			```

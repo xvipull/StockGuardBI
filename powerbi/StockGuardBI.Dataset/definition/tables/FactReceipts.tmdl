@@ -1,0 +1,49 @@
+table FactReceipts
+	lineageTag: c370591e-450a-4700-9831-factreceipts01
+
+	column receipt_fact_key
+		dataType: string
+		isKey
+		lineageTag: c370591e-450a-4700-9831-factrcptcol1
+		summarizeBy: none
+		sourceColumn: receipt_fact_key
+
+	column date_key
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-factrcptcol2
+		summarizeBy: none
+		sourceColumn: date_key
+
+	column sku_key
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-factrcptcol3
+		summarizeBy: none
+		sourceColumn: sku_key
+
+	column store_key
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-factrcptcol4
+		summarizeBy: none
+		sourceColumn: store_key
+
+	column received_qty
+		dataType: double
+		lineageTag: c370591e-450a-4700-9831-factrcptcol5
+		summarizeBy: sum
+		sourceColumn: received_qty
+
+	column unit_cost
+		dataType: double
+		lineageTag: c370591e-450a-4700-9831-factrcptcol6
+		summarizeBy: average
+		sourceColumn: unit_cost
+
+	partition FactReceipts = m
+		mode: import
+		source = ```
+			let
+			    Source = Csv.Document(File.Contents("data/curated/fact_receipts.csv"),[Delimiter=",", Columns=6, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+			    PromotedHeaders = Table.PromoteHeaders(Source, [PromoteAllScalars=true])
+			in
+			    PromotedHeaders
+			```

@@ -1,0 +1,48 @@
+table KPITargets
+	lineageTag: c370591e-450a-4700-9831-kpitargets01
+
+	column kpi_code
+		dataType: string
+		isKey
+		lineageTag: c370591e-450a-4700-9831-kpitgtcol01
+		summarizeBy: none
+		sourceColumn: kpi_code
+
+	column kpi_name
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-kpitgtcol02
+		summarizeBy: none
+		sourceColumn: kpi_name
+
+	column target_value
+		dataType: double
+		lineageTag: c370591e-450a-4700-9831-kpitgtcol03
+		summarizeBy: none
+		sourceColumn: target_value
+
+	column red_threshold
+		dataType: double
+		lineageTag: c370591e-450a-4700-9831-kpitgtcol04
+		summarizeBy: none
+		sourceColumn: red_threshold
+
+	column amber_threshold
+		dataType: double
+		lineageTag: c370591e-450a-4700-9831-kpitgtcol05
+		summarizeBy: none
+		sourceColumn: amber_threshold
+
+	partition KPITargets = calculated
+		mode: import
+		source = ```
+			DATATABLE(
+			    "kpi_code", STRING, "kpi_name", STRING, "target_value", DOUBLE, "red_threshold", DOUBLE, "amber_threshold", DOUBLE,
+			    {
+			        {"DOS", "Days of Supply", 14.0, 7.0, 14.0},
+			        {"FILL_RATE", "Fill Rate", 0.98, 0.95, 0.98},
+			        {"STOCKOUT_RATE", "Stockout Rate", 0.02, 0.05, 0.02},
+			        {"TURNS", "Inventory Turns", 4.0, 2.0, 4.0},
+			        {"AGED_PCT", "Aged Stock %", 0.05, 0.10, 0.05}
+			    }
+			)
+			```

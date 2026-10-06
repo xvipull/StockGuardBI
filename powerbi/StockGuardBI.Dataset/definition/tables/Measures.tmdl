@@ -1,0 +1,95 @@
+table Measures
+	lineageTag: c370591e-450a-4700-9831-measures0001
+
+	measure 'Total On-Hand Qty' = SUM(FactInventoryDaily[on_hand_qty])
+		formatString: #,##0
+		lineageTag: c370591e-450a-4700-9831-meascol00001
+
+	measure 'Total Available Qty' = SUM(FactInventoryDaily[available_inventory_qty])
+		formatString: #,##0
+		lineageTag: c370591e-450a-4700-9831-meascol00002
+
+	measure 'Total Allocated Qty' = SUM(FactInventoryDaily[allocated_qty])
+		formatString: #,##0
+		lineageTag: c370591e-450a-4700-9831-meascol00003
+
+	measure 'Total Unavailable Qty' = SUM(FactInventoryDaily[unavailable_qty])
+		formatString: #,##0
+		lineageTag: c370591e-450a-4700-9831-meascol00004
+
+	measure 'Total In-Transit Qty' = SUM(FactInventoryDaily[in_transit_qty])
+		formatString: #,##0
+		lineageTag: c370591e-450a-4700-9831-meascol00005
+
+	measure 'Ending Inventory Value' = SUM(FactInventoryDaily[inventory_value])
+		formatString: \$#,##0.00
+		lineageTag: c370591e-450a-4700-9831-meascol00006
+
+	measure 'Average Inventory Value' = AVERAGEX(VALUES(DateTable[DateKey]), SUM(FactInventoryDaily[inventory_value]))
+		formatString: \$#,##0.00
+		lineageTag: c370591e-450a-4700-9831-meascol00007
+
+	measure 'Total Units Sold' = SUM(FactSalesDaily[units_sold_qty])
+		formatString: #,##0
+		lineageTag: c370591e-450a-4700-9831-meascol00008
+
+	measure 'Total Net Sales' = SUM(FactSalesDaily[net_sales_amount])
+		formatString: \$#,##0.00
+		lineageTag: c370591e-450a-4700-9831-meascol00009
+
+	measure 'Total COGS' = SUM(FactSalesDaily[cogs_amount])
+		formatString: \$#,##0.00
+		lineageTag: c370591e-450a-4700-9831-meascol00010
+
+	measure 'Average Daily Demand Qty' = DIVIDE([Total Units Sold], MAX(COUNTROWS(DateTable), 1), 0)
+		formatString: #,##0.00
+		lineageTag: c370591e-450a-4700-9831-meascol00011
+
+	measure 'Days of Supply (DOS)' = DIVIDE([Total Available Qty], [Average Daily Demand Qty], BLANK())
+		formatString: 0.0
+		lineageTag: c370591e-450a-4700-9831-meascol00012
+
+	measure 'DOS Target' = VAR TargetVal = LOOKUPVALUE(KPITargets[target_value], KPITargets[kpi_code], "DOS") RETURN IF(ISBLANK(TargetVal), 14.0, TargetVal)
+		formatString: 0.0
+		lineageTag: c370591e-450a-4700-9831-meascol00013
+
+	measure 'DOS Variance' = IF(ISBLANK([Days of Supply (DOS)]), BLANK(), [Days of Supply (DOS)] - [DOS Target])
+		formatString: +0.0;-0.0;0.0
+		lineageTag: c370591e-450a-4700-9831-meascol00014
+
+	measure 'Fill Rate %' = DIVIDE(SUM(FactSalesDaily[fulfilled_qty]), SUM(FactSalesDaily[requested_qty]), BLANK())
+		formatString: 0.0%
+		lineageTag: c370591e-450a-4700-9831-meascol00015
+
+	measure 'Stockout Rate %' = DIVIDE(COUNTROWS(FILTER(FactInventoryDaily, FactInventoryDaily[available_inventory_qty] <= 0)), COUNTROWS(FactInventoryDaily), BLANK())
+		formatString: 0.0%
+		lineageTag: c370591e-450a-4700-9831-meascol00016
+
+	measure 'Inventory Turns (Annualized)' = DIVIDE([Total COGS] * (365 / MAX(COUNTROWS(DateTable), 1)), [Average Inventory Value], BLANK())
+		formatString: 0.00
+		lineageTag: c370591e-450a-4700-9831-meascol00017
+
+	measure 'Aged Stock Value (>90d)' = CALCULATE([Ending Inventory Value], FactInventoryDaily[inventory_age_days] > 90)
+		formatString: \$#,##0.00
+		lineageTag: c370591e-450a-4700-9831-meascol00018
+
+	measure 'Critical Aged Value (>180d)' = CALCULATE([Ending Inventory Value], FactInventoryDaily[inventory_age_days] > 180)
+		formatString: \$#,##0.00
+		lineageTag: c370591e-450a-4700-9831-meascol00019
+
+	measure 'Aged Stock %' = DIVIDE([Aged Stock Value (>90d)], [Ending Inventory Value], 0)
+		formatString: 0.0%
+		lineageTag: c370591e-450a-4700-9831-meascol00020
+
+	measure 'Replenishment Exception Count' = COUNTROWS(FILTER(FactInventoryDaily, FactInventoryDaily[available_inventory_qty] <= 0 || [Days of Supply (DOS)] < 7))
+		formatString: #,##0
+		lineageTag: c370591e-450a-4700-9831-meascol00021
+
+	partition Measures = m
+		mode: import
+		source = ```
+			let
+			    Source = Table.FromRows({}, {"MeasureHolder"})
+			in
+			    Source
+			```

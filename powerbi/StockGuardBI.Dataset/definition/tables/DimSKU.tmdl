@@ -1,0 +1,55 @@
+table DimSKU
+	lineageTag: c370591e-450a-4700-9831-sku000000001
+
+	column sku_key
+		dataType: string
+		isKey
+		lineageTag: c370591e-450a-4700-9831-skucol000001
+		summarizeBy: none
+		sourceColumn: sku_key
+
+	column sku_id
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-skucol000002
+		summarizeBy: none
+		sourceColumn: sku_id
+
+	column sku_name
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-skucol000003
+		summarizeBy: none
+		sourceColumn: sku_name
+
+	column category
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-skucol000004
+		summarizeBy: none
+		sourceColumn: category
+
+	column subcategory
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-skucol000005
+		summarizeBy: none
+		sourceColumn: subcategory
+
+	column base_uom
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-skucol000006
+		summarizeBy: none
+		sourceColumn: base_uom
+
+	column product_status
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-skucol000007
+		summarizeBy: none
+		sourceColumn: product_status
+
+	partition DimSKU = m
+		mode: import
+		source = ```
+			let
+			    Source = Csv.Document(File.Contents("data/curated/dim_sku.csv"),[Delimiter=",", Columns=7, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+			    PromotedHeaders = Table.PromoteHeaders(Source, [PromoteAllScalars=true])
+			in
+			    PromotedHeaders
+			```

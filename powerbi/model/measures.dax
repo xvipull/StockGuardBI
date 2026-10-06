@@ -1,0 +1,210 @@
+// ===============================================================================
+// StockGuard BI — Power BI DAX Measure Definitions Catalog
+// Architecture: Clean Star Schema Semantic Model (Direct & Aggregated Measures)
+// Rule: No unnecessary calculated columns; all rate/ratio metrics use dynamic DAX.
+// ===============================================================================
+
+// -------------------------------------------------------------------------------
+// 1. INVENTORY POSITION & VALUATION MEASURES
+// -------------------------------------------------------------------------------
+
+/// Total physical stock on hand at closing snapshot
+[Total On-Hand Qty] = 
+SUM(FactInventoryDaily[on_hand_qty])
+// Format: #,##0
+
+/// Sellable stock available for fulfillment (On-Hand - Allocated - Unavailable)
+[Total Available Qty] = 
+SUM(FactInventoryDaily[available_inventory_qty])
+// Format: #,##0
+
+/// Committed stock allocated to pending customer orders
+[Total Allocated Qty] = 
+SUM(FactInventoryDaily[allocated_qty])
+// Format: #,##0
+
+/// Stock quarantined due to quality hold, damage, or blocking
+[Total Unavailable Qty] = 
+SUM(FactInventoryDaily[unavailable_qty])
+// Format: #,##0
+
+/// Stock in transit from DC/supplier not yet receipted
+[Total In-Transit Qty] = 
+SUM(FactInventoryDaily[in_transit_qty])
+// Format: #,##0
+
+/// Closing inventory monetary valuation based on unit cost (on_hand_qty * unit_cost)
+[Ending Inventory Value] = 
+SUM(FactInventoryDaily[inventory_value])
+// Format: $#,##0.00
+
+/// Daily average inventory value across selected calendar dates
+[Average Inventory Value] = 
+AVERAGEX(
+    VALUES(DateTable[DateKey]),
+    CALCULATE(SUM(FactInventoryDaily[inventory_value]))
+)
+// Format: $#,##0.00
+
+
+// -------------------------------------------------------------------------------
+// 2. DEMAND, SALES & DAYS OF SUPPLY (DOS) MEASURES
+// -------------------------------------------------------------------------------
+
+/// Total units sold / fulfilled across stores
+[Total Units Sold] = 
+SUM(FactSalesDaily[units_sold_qty])
+// Format: #,##0
+
+/// Total gross/net sales revenue
+[Total Net Sales] = 
+SUM(FactSalesDaily[net_sales_amount])
+// Format: $#,##0.00
+
+/// Total Cost of Goods Sold (COGS)
+[Total COGS] = 
+SUM(FactSalesDaily[cogs_amount])
+// Format: $#,##0.00
+
+/// Average daily demand quantity over the selected date range
+[Average Daily Demand Qty] = 
+DIVIDE(
+    [Total Units Sold],
+    MAX(COUNTROWS(DateTable), 1),
+    0
+)
+// Format: #,##0.00
+
+/// Days of Supply (DOS) = Total Available Qty / Average Daily Demand Qty
+[Days of Supply (DOS)] = 
+DIVIDE(
+    [Total Available Qty],
+    [Average Daily Demand Qty],
+    BLANK()
+)
+// Format: 0.0
+
+/// Governance Target for Days of Supply (Default: 14.0 days)
+[DOS Target] = 
+VAR TargetVal = LOOKUPVALUE(KPITargets[target_value], KPITargets[kpi_code], "DOS")
+RETURN IF(ISBLANK(TargetVal), 14.0, TargetVal)
+// Format: 0.0
+
+/// Variance between actual DOS and Governance Target
+[DOS Variance] = 
+IF(
+    ISBLANK([Days of Supply (DOS)]),
+    BLANK(),
+    [Days of Supply (DOS)] - [DOS Target]
+)
+// Format: +0.0;-0.0;0.0
+
+/// Dynamic RAG Status Classification for DOS
+[DOS Status] = 
+VAR ActualDOS = [Days of Supply (DOS)]
+RETURN
+IF(
+    ISBLANK(ActualDOS),
+    "NO DEMAND",
+    IF(
+        ActualDOS < 7.0,
+        "RED (Critical Low)",
+        IF(
+            ActualDOS <= 14.0,
+            "AMBER (Low Cover)",
+            "GREEN (Healthy)"
+        )
+    )
+)
+// Format: Text
+
+
+// -------------------------------------------------------------------------------
+// 3. PERFORMANCE & OPERATIONAL RATIOS
+// -------------------------------------------------------------------------------
+
+/// Order Fill Rate % = Fulfilled Quantity / Requested Quantity
+[Fill Rate %] = 
+DIVIDE(
+    SUM(FactSalesDaily[fulfilled_qty]),
+    SUM(FactSalesDaily[requested_qty]),
+    BLANK()
+)
+// Format: 0.0% | Target: >= 98.0%
+
+/// Stockout Rate % = Percentage of active SKU-store-day positions with zero or negative available stock
+[Stockout Rate %] = 
+DIVIDE(
+    COUNTROWS(FILTER(FactInventoryDaily, FactInventoryDaily[available_inventory_qty] <= 0)),
+    COUNTROWS(FactInventoryDaily),
+    BLANK()
+)
+// Format: 0.0% | Target: <= 2.0%
+
+/// Annualized Inventory Turns = (Annualized COGS) / (Average Inventory Value)
+[Inventory Turns (Annualized)] = 
+DIVIDE(
+    [Total COGS] * (365 / MAX(COUNTROWS(DateTable), 1)),
+    [Average Inventory Value],
+    BLANK()
+)
+// Format: 0.00 | Target: >= 4.0
+
+/// Sell-Through Rate % = Units Sold / (Opening Stock + Receipts)
+[Sell-Through %] = 
+VAR TotalReceipts = SUM(FactReceipts[received_qty])
+VAR Denominator = [Total On-Hand Qty] + TotalReceipts
+RETURN
+DIVIDE(
+    [Total Units Sold],
+    Denominator,
+    BLANK()
+)
+// Format: 0.0% | Target: >= 50.0%
+
+
+// -------------------------------------------------------------------------------
+// 4. WORKING CAPITAL & EXCEPTION MEASURES
+// -------------------------------------------------------------------------------
+
+/// Valuation of inventory aged greater than 90 days
+[Aged Stock Value (>90d)] = 
+CALCULATE(
+    [Ending Inventory Value],
+    FactInventoryDaily[inventory_age_days] > 90
+)
+// Format: $#,##0.00
+
+/// Valuation of inventory aged greater than 180 days (Critical risk)
+[Critical Aged Value (>180d)] = 
+CALCULATE(
+    [Ending Inventory Value],
+    FactInventoryDaily[inventory_age_days] > 180
+)
+// Format: $#,##0.00
+
+/// Percentage of inventory value bound up in aged stock (>90 days)
+[Aged Stock %] = 
+DIVIDE(
+    [Aged Stock Value (>90d)],
+    [Ending Inventory Value],
+    0
+)
+// Format: 0.0% | Target: <= 5.0%
+
+/// Total count of stockout or low-cover replenishment exceptions requiring action
+[Replenishment Exception Count] = 
+COUNTROWS(
+    FILTER(
+        FactInventoryDaily,
+        FactInventoryDaily[available_inventory_qty] <= 0 ||
+        (
+            DIVIDE(
+                FactInventoryDaily[available_inventory_qty],
+                CALCULATE([Average Daily Demand Qty]),
+                999.0
+            ) < 7.0
+        )
+    )
+)
+// Format: #,##0

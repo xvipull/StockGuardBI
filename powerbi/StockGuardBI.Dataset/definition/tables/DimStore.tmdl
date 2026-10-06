@@ -1,0 +1,49 @@
+table DimStore
+	lineageTag: c370591e-450a-4700-9831-store00000001
+
+	column store_key
+		dataType: string
+		isKey
+		lineageTag: c370591e-450a-4700-9831-storecol00001
+		summarizeBy: none
+		sourceColumn: store_key
+
+	column store_id
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-storecol00002
+		summarizeBy: none
+		sourceColumn: store_id
+
+	column store_name
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-storecol00003
+		summarizeBy: none
+		sourceColumn: store_name
+
+	column region
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-storecol00004
+		summarizeBy: none
+		sourceColumn: region
+
+	column store_type
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-storecol00005
+		summarizeBy: none
+		sourceColumn: store_type
+
+	column store_status
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-storecol00006
+		summarizeBy: none
+		sourceColumn: store_status
+
+	partition DimStore = m
+		mode: import
+		source = ```
+			let
+			    Source = Csv.Document(File.Contents("data/curated/dim_store.csv"),[Delimiter=",", Columns=6, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+			    PromotedHeaders = Table.PromoteHeaders(Source, [PromoteAllScalars=true])
+			in
+			    PromotedHeaders
+			```

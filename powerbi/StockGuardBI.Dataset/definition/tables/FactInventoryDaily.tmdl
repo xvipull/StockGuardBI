@@ -1,0 +1,99 @@
+table FactInventoryDaily
+	lineageTag: c370591e-450a-4700-9831-factinv000001
+
+	column inventory_daily_key
+		dataType: string
+		isKey
+		lineageTag: c370591e-450a-4700-9831-factinvcol001
+		summarizeBy: none
+		sourceColumn: inventory_daily_key
+
+	column date_key
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-factinvcol002
+		summarizeBy: none
+		sourceColumn: date_key
+
+	column business_date
+		dataType: dateTime
+		formatString: yyyy-MM-dd
+		lineageTag: c370591e-450a-4700-9831-factinvcol003
+		summarizeBy: none
+		sourceColumn: business_date
+
+	column sku_key
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-factinvcol004
+		summarizeBy: none
+		sourceColumn: sku_key
+
+	column store_key
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-factinvcol005
+		summarizeBy: none
+		sourceColumn: store_key
+
+	column reorder_parameter_key
+		dataType: string
+		lineageTag: c370591e-450a-4700-9831-factinvcol006
+		summarizeBy: none
+		sourceColumn: reorder_parameter_key
+
+	column on_hand_qty
+		dataType: double
+		lineageTag: c370591e-450a-4700-9831-factinvcol007
+		summarizeBy: sum
+		sourceColumn: on_hand_qty
+
+	column allocated_qty
+		dataType: double
+		lineageTag: c370591e-450a-4700-9831-factinvcol008
+		summarizeBy: sum
+		sourceColumn: allocated_qty
+
+	column unavailable_qty
+		dataType: double
+		lineageTag: c370591e-450a-4700-9831-factinvcol009
+		summarizeBy: sum
+		sourceColumn: unavailable_qty
+
+	column in_transit_qty
+		dataType: double
+		lineageTag: c370591e-450a-4700-9831-factinvcol010
+		summarizeBy: sum
+		sourceColumn: in_transit_qty
+
+	column available_inventory_qty
+		dataType: double
+		lineageTag: c370591e-450a-4700-9831-factinvcol011
+		summarizeBy: sum
+		sourceColumn: available_inventory_qty
+
+	column unit_cost
+		dataType: double
+		lineageTag: c370591e-450a-4700-9831-factinvcol012
+		summarizeBy: average
+		sourceColumn: unit_cost
+
+	column inventory_value
+		dataType: double
+		formatString: \$#,##0.00
+		lineageTag: c370591e-450a-4700-9831-factinvcol013
+		summarizeBy: sum
+		sourceColumn: inventory_value
+
+	column inventory_age_days
+		dataType: int64
+		lineageTag: c370591e-450a-4700-9831-factinvcol014
+		summarizeBy: average
+		sourceColumn: inventory_age_days
+
+	partition FactInventoryDaily = m
+		mode: import
+		source = ```
+			let
+			    Source = Csv.Document(File.Contents("data/curated/fact_inventory_daily.csv"),[Delimiter=",", Columns=14, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+			    PromotedHeaders = Table.PromoteHeaders(Source, [PromoteAllScalars=true])
+			in
+			    PromotedHeaders
+			```
