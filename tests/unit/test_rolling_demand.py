@@ -1,15 +1,22 @@
+import os
+import shutil
+import subprocess
 import unittest
 from datetime import date, timedelta
-import subprocess
 
 from pyspark.sql import SparkSession
 
-from src.transforms.rolling_demand import calculate_rolling_demand_and_dos
+from src.transforms.rolling_demand import (
+    calculate_rolling_demand_and_dos,
+    ensure_java_env,
+    get_spark_session,
+)
 
 
 class RollingDemandTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        ensure_java_env()
         java = subprocess.run(["java", "-version"], capture_output=True, text=True)
         if java.returncode != 0:
             raise unittest.SkipTest("A Java runtime is required to execute PySpark tests")
@@ -66,6 +73,45 @@ class RollingDemandTest(unittest.TestCase):
         self.assertEqual("INCOMPLETE_HISTORY", result["demand_status"])
         self.assertIsNone(result["average_daily_demand_qty"])
         self.assertIsNone(result["days_of_supply"])
+
+    def test_optimization_equivalence(self):
+        inventory_rows, sales_rows = [], []
+        start = date(2025, 1, 1)
+        for offset in range(30):
+            day = start + timedelta(days=offset)
+            inventory_rows.append((day.isoformat(), "SKU-OPT", "STORE-001", 100.0))
+            sales_rows.append((day.isoformat(), "SKU-OPT", "STORE-001", 5.0))
+
+        inventory = self.spark.createDataFrame(inventory_rows, "business_date string, sku_id string, store_id string, available_inventory_qty double")
+        sales = self.spark.createDataFrame(sales_rows, "sale_date string, sku_id string, store_id string, units_sold_qty double")
+
+        baseline = calculate_rolling_demand_and_dos(inventory, sales, optimize=False).collect()
+        optimized = calculate_rolling_demand_and_dos(inventory, sales, optimize=True).collect()
+
+        baseline_sorted = sorted([r.asDict() for r in baseline], key=lambda x: str(x["business_date"]))
+        optimized_sorted = sorted([r.asDict() for r in optimized], key=lambda x: str(x["business_date"]))
+
+        self.assertEqual(len(baseline_sorted), len(optimized_sorted))
+        for b, o in zip(baseline_sorted, optimized_sorted):
+            self.assertEqual(b["business_date"], o["business_date"])
+            self.assertEqual(b["demand_status"], o["demand_status"])
+            self.assertEqual(b["average_daily_demand_qty"], o["average_daily_demand_qty"])
+            self.assertEqual(b["days_of_supply"], o["days_of_supply"])
+
+    def test_broadcast_and_partitioning_flags(self):
+        inventory = self.spark.createDataFrame([
+            ("2025-01-01", "SKU-BCAST", "STORE-001", 50.0),
+        ], "business_date string, sku_id string, store_id string, available_inventory_qty double")
+        sales = self.spark.createDataFrame([
+            ("2025-01-01", "SKU-BCAST", "STORE-001", 5.0),
+        ], "sale_date string, sku_id string, store_id string, units_sold_qty double")
+
+        result = calculate_rolling_demand_and_dos(
+            inventory, sales, use_broadcast=True, repartition_keys=True, num_partitions=4
+        )
+        row = result.first()
+        self.assertIsNotNone(row)
+        self.assertEqual("SKU-BCAST", row["sku_id"])
 
 
 if __name__ == "__main__":

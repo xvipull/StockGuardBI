@@ -1,0 +1,100 @@
+{
+  "benchmark_results": [
+    {
+      "scale_config": {
+        "num_skus": 50,
+        "num_stores": 10,
+        "num_days": 28,
+        "total_inventory_rows": 14000
+      },
+      "baseline": {
+        "optimize": false,
+        "use_broadcast": false,
+        "repartition_keys": false,
+        "num_partitions": 8,
+        "elapsed_seconds": 0.5293,
+        "result_row_count": 14000,
+        "throughput_rows_per_sec": 26448.15
+      },
+      "optimized": {
+        "optimize": true,
+        "use_broadcast": true,
+        "repartition_keys": true,
+        "num_partitions": 8,
+        "elapsed_seconds": 0.3109,
+        "result_row_count": 14000,
+        "throughput_rows_per_sec": 45023.68
+      },
+      "performance_summary": {
+        "speedup_factor": 1.7,
+        "time_saved_percent": 41.26,
+        "baseline_throughput_rows_sec": 26448.15,
+        "optimized_throughput_rows_sec": 45023.68
+      }
+    },
+    {
+      "scale_config": {
+        "num_skus": 200,
+        "num_stores": 20,
+        "num_days": 28,
+        "total_inventory_rows": 112000
+      },
+      "baseline": {
+        "optimize": false,
+        "use_broadcast": false,
+        "repartition_keys": false,
+        "num_partitions": 8,
+        "elapsed_seconds": 0.5025,
+        "result_row_count": 112000,
+        "throughput_rows_per_sec": 222878.2
+      },
+      "optimized": {
+        "optimize": true,
+        "use_broadcast": true,
+        "repartition_keys": true,
+        "num_partitions": 8,
+        "elapsed_seconds": 0.3763,
+        "result_row_count": 112000,
+        "throughput_rows_per_sec": 297634.93
+      },
+      "performance_summary": {
+        "speedup_factor": 1.34,
+        "time_saved_percent": 25.11,
+        "baseline_throughput_rows_sec": 222878.2,
+        "optimized_throughput_rows_sec": 297634.93
+      }
+    },
+    {
+      "scale_config": {
+        "num_skus": 500,
+        "num_stores": 50,
+        "num_days": 28,
+        "total_inventory_rows": 700000
+      },
+      "baseline": {
+        "optimize": false,
+        "use_broadcast": false,
+        "repartition_keys": false,
+        "num_partitions": 8,
+        "elapsed_seconds": 0.3877,
+        "result_row_count": 700000,
+        "throughput_rows_per_sec": 1805474.33
+      },
+      "optimized": {
+        "optimize": true,
+        "use_broadcast": true,
+        "repartition_keys": true,
+        "num_partitions": 8,
+        "elapsed_seconds": 0.3147,
+        "result_row_count": 700000,
+        "throughput_rows_per_sec": 2224655.22
+      },
+      "performance_summary": {
+        "speedup_factor": 1.23,
+        "time_saved_percent": 18.83,
+        "baseline_throughput_rows_sec": 1805474.33,
+        "optimized_throughput_rows_sec": 2224655.22
+      }
+    }
+  ]
+}
