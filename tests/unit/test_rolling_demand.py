@@ -34,7 +34,12 @@ class RollingDemandTest(unittest.TestCase):
             day = start + timedelta(days=offset)
             for sku_id, available_qty, demand in (("SKU-EST", 100.0, 10.0), ("SKU-ZERO", 50.0, 0.0)):
                 inventory_rows.append((day.isoformat(), sku_id, "STORE-001", available_qty))
-                sales_rows.append((day.isoformat(), sku_id, "STORE-001", demand))
+                # No sales rows are emitted for SKU-ZERO: an absent fact must
+                # be treated as zero demand, rather than as missing demand.
+                if demand:
+                    sales_rows.append((day.isoformat(), sku_id, "STORE-001", demand))
+            inventory_rows.append((day.isoformat(), "SKU-OUT", "STORE-001", 0.0))
+            sales_rows.append((day.isoformat(), "SKU-OUT", "STORE-001", 10.0))
         for offset in range(4):
             day = start + timedelta(days=24 + offset)
             inventory_rows.append((day.isoformat(), "SKU-NEW", "STORE-001", 20.0))
@@ -54,6 +59,11 @@ class RollingDemandTest(unittest.TestCase):
         self.assertEqual("ZERO_DEMAND", zero_demand["demand_status"])
         self.assertIsNone(zero_demand["average_daily_demand_qty"])
         self.assertIsNone(zero_demand["days_of_supply"])
+
+        zero_stock = rows[("SKU-OUT", "2025-01-28")]
+        self.assertEqual("ESTABLISHED", zero_stock["demand_status"])
+        self.assertAlmostEqual(10.0, zero_stock["average_daily_demand_qty"])
+        self.assertAlmostEqual(0.0, zero_stock["days_of_supply"])
 
         launched = rows[("SKU-NEW", "2025-01-28")]
         self.assertEqual("NEWLY_LAUNCHED", launched["demand_status"])
