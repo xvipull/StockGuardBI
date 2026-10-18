@@ -1,0 +1,2 @@
+# Core runtime and test dependency. Java 17 is also required for Spark execution.
+pyspark>=4.0,<5.0
